@@ -147,7 +147,7 @@ export default function Home() {
                       style={{ width: 256, height: 256 }}
                     >
                       <QRCode
-                        value={`http://localhost:3000/menu?hotel=${hotel.restaurantId}`}
+                        value={`/menu?hotel=${hotel.restaurantId}`}
                         size={256}
                         ref={(el: any) => {
                           qrRefs.current[hotel.restaurantId] = el;
