@@ -14,6 +14,7 @@ import {
 import { Button } from "../components/ui/button";
 import { restaurants } from "../lib/menuData";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Dynamically import the QrScannerComponent and disable server-side rendering
 const _QrScannerComponent = dynamic(() => import("../components/QRScanner"), {
@@ -24,6 +25,7 @@ const QrScannerClient = dynamic(() => import("../components/QRScannerClient"), {
 });
 
 export default function Home() {
+  const router = useRouter()
   const [scannerOpen, setScannerOpen] = useState(false)
   const qrRefs = useRef<{ [key: string]: SVGSVGElement | null }>({});
 
@@ -82,8 +84,9 @@ export default function Home() {
   };
 
 
-  const handleSuccess = (msg: string) => {
+  const handleSuccess = (msg: string, path: string) => {
     toast.success("success: " + msg)
+    router.push(path)
   }
 
   const handleError = (err: string) => {

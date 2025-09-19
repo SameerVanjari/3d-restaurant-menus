@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useZxing } from 'react-zxing';
 
 type Props = {
-    onSuccess: (text: string) => void;
+    onSuccess: (msg: string, text: string) => void;
     onError?: (text: string) => void;
     validate?: (text: string) => boolean;
 };
@@ -15,16 +15,13 @@ export default function QrScannerClient({ onSuccess, onError }: Props) {
         onDecodeResult(result) {
             const text = result.getText();
 
-
-            setLast(text);            // const isValid = Object.keys(value).includes("restaurantId");
-            // console.log("validatin in ", value);
-            if (true) {
-                onSuccess(text);
+            setLast(text);
+            const isValid = text.includes("hotel=");
+            if (isValid) {
+                onSuccess("Scanned the QR successfully!", text);
             } else {
-                onError?.(text);
+                onError?.("QR code not valid. Please use a valid code.");
             }
-
-
         },
         onError(error) {
             console.error('QR scanner error:', error);

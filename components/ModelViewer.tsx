@@ -6,22 +6,29 @@ import * as THREE from 'three';
 const ModelViewer = ({ modelPath, scale = 1 }: { modelPath: string; scale?: number }) => {
     const { scene } = useGLTF(modelPath);
 
-    // Clean up geometry & materials on unmount to avoid memory leaks
+    // // Clean up geometry & materials on unmount to avoid memory leaks
+    // useEffect(() => {
+    //     return () => {
+    //         scene.traverse((obj: THREE.Object3D) => {
+    //             if ((obj as THREE.Mesh).geometry) {
+    //                 (obj as THREE.Mesh).geometry.dispose();
+    //             }
+    //             if ((obj as THREE.Mesh).material) {
+    //                 const materials = Array.isArray((obj as THREE.Mesh).material)
+    //                     ? (obj as THREE.Mesh).material
+    //                     : [(obj as THREE.Mesh).material];
+    //                 (materials as any).forEach((m: any) => m.dispose && m.dispose());
+    //             }
+    //         });
+    //     };
+    // }, [scene]);
+
+    // Clear GLTF cache on unmount
     useEffect(() => {
         return () => {
-            scene.traverse((obj: THREE.Object3D) => {
-                if ((obj as THREE.Mesh).geometry) {
-                    (obj as THREE.Mesh).geometry.dispose();
-                }
-                if ((obj as THREE.Mesh).material) {
-                    const materials = Array.isArray((obj as THREE.Mesh).material)
-                        ? (obj as THREE.Mesh).material
-                        : [(obj as THREE.Mesh).material];
-                    (materials as any).forEach((m: any) => m.dispose && m.dispose());
-                }
-            });
+            useGLTF.clear(modelPath);
         };
-    }, [scene]);
+    }, [modelPath]);
 
     return (
         <Canvas
