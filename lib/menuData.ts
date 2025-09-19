@@ -15,6 +15,8 @@ export type MenuItem = {
   ingredients?: string[];
   allergens?: string[];
   spicyLevel?: number; // 0-3
+  model?: string;
+  scale?: number;
 };
 
 export type RestaurantMenu = {
@@ -107,6 +109,8 @@ export const restaurants: RestaurantMenu[] = [
         ingredients: ["Paneer", "Tomato", "Cashew", "Cream", "Spices"],
         allergens: ["Dairy", "Nuts"],
         spicyLevel: 2,
+        model: "/models/meat_pie_chips__fries_mushy_peas_and_gravy.glb",
+        scale: 200
       },
       {
         id: "sh-2",
@@ -123,6 +127,8 @@ export const restaurants: RestaurantMenu[] = [
         ingredients: ["Chicken", "Basmati rice", "Saffron", "Spices", "Yogurt"],
         allergens: ["Dairy"],
         spicyLevel: 3,
+        model: "/models/biryani.glb",
+        scale: 10
       },
       {
         id: "sh-3",
@@ -138,6 +144,7 @@ export const restaurants: RestaurantMenu[] = [
         ingredients: ["Mango", "Yogurt", "Sugar"],
         allergens: ["Dairy"],
         spicyLevel: 0,
+        model: "/models/honey_bee_milkshake_drink.glb",
       },
     ],
   },
