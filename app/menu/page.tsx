@@ -1,5 +1,5 @@
 "use client";
-import { ArrowLeft, ArrowRight, Circle, Vegan } from "lucide-react";
+import { ArrowLeft, ArrowRight, Circle, Loader, Vegan } from "lucide-react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,10 +10,13 @@ import "swiper/css"
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 import { Navigation, Pagination } from "swiper/modules";
+import { Suspense } from "react";
 
 const ModelViewer = dynamic(() => import("@/components/ModelViewer"), { ssr: false });
 
-const MenuPage = () => {
+
+
+const MenuPageComponent = () => {
   const searchParams = useSearchParams();
   const hotel = searchParams.get("hotel") || "bistro-avenue";
 
@@ -99,5 +102,11 @@ const MenuPage = () => {
     </div>
   );
 };
+
+const MenuPage = () => {
+  return <Suspense fallback={<div><Loader className="animate-spin" /> </div>}>
+    <MenuPageComponent />
+  </Suspense>
+}
 
 export default MenuPage;
