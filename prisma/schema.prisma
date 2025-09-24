@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Menu {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  qrCodeUrl   String?
+  createdAt   DateTime @default(now())
+
+  items MenuItem[]
+  orders Order[]
+
+  @@map("menus")
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  menuId      String
+  name        String
+  imageUrl    String?
+  description String?
+  category    String
+  price       Float
+
+  orders OrderItem[]
+
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@map("menu_items")
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  menuId      String
+  totalAmount Float
+  createdAt   DateTime @default(now())
+
+  items OrderItem[]
+
+  menu Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  orderId    String
+  menuItemId String
+  quantity   Int
+  price      Float
+
+  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
