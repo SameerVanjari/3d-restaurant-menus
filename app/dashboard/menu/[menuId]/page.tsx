@@ -5,12 +5,10 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Plus, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
+import ItemForm from '@/components/forms/item-form';
 
 type MenuItem = {
     id: string;
@@ -27,13 +25,6 @@ export default function ManageMenuItems() {
     const menuId = params.menuId as string;
     const [items, setItems] = useState<MenuItem[]>([]);
     const [isAddItemOpen, setIsAddItemOpen] = useState(false);
-    const [newItem, setNewItem] = useState({
-        name: '',
-        description: '',
-        price: 0,
-        category: '',
-        imageUrl: '',
-    });
 
     useEffect(() => {
         fetchItems();
@@ -44,32 +35,11 @@ export default function ManageMenuItems() {
             const response = await fetch(`/api/menus/${menuId}/items`);
             if (response.ok) {
                 const data = await response.json();
-
                 console.log("data", data)
                 setItems(data);
             }
         } catch (error) {
             toast.error('Failed to fetch items');
-        }
-    };
-
-    const addItem = async () => {
-        try {
-            const response = await fetch(`/api/menus/${menuId}/items`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newItem),
-            });
-            if (response.ok) {
-                toast.success('Item added successfully');
-                setNewItem({ name: '', description: '', price: 0, category: '', imageUrl: '' });
-                setIsAddItemOpen(false);
-                fetchItems();
-            } else {
-                toast.error('Failed to add item');
-            }
-        } catch (error) {
-            toast.error('Failed to add item');
         }
     };
 
@@ -94,57 +64,7 @@ export default function ManageMenuItems() {
                         <DialogHeader>
                             <DialogTitle>Add New Item</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="name">Name</Label>
-                                <Input
-                                    id="name"
-                                    value={newItem.name}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewItem({ ...newItem, name: e.target.value })}
-                                    placeholder="Item Name"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    value={newItem.description}
-                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewItem({ ...newItem, description: e.target.value })}
-                                    placeholder="Item Description"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="price">Price</Label>
-                                <Input
-                                    id="price"
-                                    type="number"
-                                    value={newItem.price}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
-                                    placeholder="Price"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="category">Category</Label>
-                                <Input
-                                    id="category"
-                                    value={newItem.category}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewItem({ ...newItem, category: e.target.value })}
-                                    placeholder="Category"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="imageUrl">Image URL</Label>
-                                <Input
-                                    id="imageUrl"
-                                    value={newItem.imageUrl}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewItem({ ...newItem, imageUrl: e.target.value })}
-                                    placeholder="Image URL"
-                                />
-                            </div>
-                            <Button onClick={addItem} className="w-full">
-                                Add Item
-                            </Button>
-                        </div>
+                        <ItemForm menuId={menuId} onSuccess={() => { setIsAddItemOpen(false); fetchItems(); }} />
                     </DialogContent>
                 </Dialog>
             </div>

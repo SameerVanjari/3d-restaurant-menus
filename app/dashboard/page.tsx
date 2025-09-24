@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Plus, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'react-qr-code';
+import MenuForm from '@/components/forms/menu-form';
 
 type Menu = {
     id: string;
@@ -24,7 +22,6 @@ export default function Dashboard() {
     const router = useRouter();
     const [menus, setMenus] = useState<Menu[]>([]);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
-    const [newMenu, setNewMenu] = useState({ title: '', description: '' });
 
     // Fetch menus
     useEffect(() => {
@@ -43,26 +40,6 @@ export default function Dashboard() {
         }
     };
 
-    const createMenu = async () => {
-        try {
-            const response = await fetch('/api/menus', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newMenu),
-            });
-            if (response.ok) {
-                toast.success('Menu created successfully');
-                setNewMenu({ title: '', description: '' });
-                setIsCreateMenuOpen(false);
-                fetchMenus();
-            } else {
-                toast.error('Failed to create menu');
-            }
-        } catch (error) {
-            toast.error('Failed to create menu');
-        }
-    };
-
     return (
         <div className="container mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
@@ -78,29 +55,7 @@ export default function Dashboard() {
                         <DialogHeader>
                             <DialogTitle>Create New Menu</DialogTitle>
                         </DialogHeader>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="title">Title</Label>
-                                <Input
-                                    id="title"
-                                    value={newMenu.title}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewMenu({ ...newMenu, title: e.target.value })}
-                                    placeholder="Menu Title"
-                                />
-                            </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea
-                                    id="description"
-                                    value={newMenu.description}
-                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMenu({ ...newMenu, description: e.target.value })}
-                                    placeholder="Menu Description"
-                                />
-                            </div>
-                            <Button onClick={createMenu} className="w-full">
-                                Create Menu
-                            </Button>
-                        </div>
+                        <MenuForm onSuccess={() => { setIsCreateMenuOpen(false); fetchMenus(); }} />
                     </DialogContent>
                 </Dialog>
             </div>

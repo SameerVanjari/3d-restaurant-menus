@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 
 type MenuItem = {
@@ -28,6 +29,7 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
     const [cart, setCart] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
+    const [billOpen, setBillOpen] = useState(false);
 
     useEffect(() => {
         fetchMenuItems();
@@ -75,6 +77,14 @@ export default function MenuPage() {
     };
 
     const total = cart.reduce((sum, c) => sum + c.item.price * c.quantity, 0);
+
+    const generateBill = () => {
+        if (cart.length === 0) {
+            toast.error('Cart is empty');
+            return;
+        }
+        setBillOpen(true);
+    };
 
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -148,12 +158,41 @@ export default function MenuPage() {
                             <span>Total:</span>
                             <span>${total.toFixed(2)}</span>
                         </div>
-                        <Button className="w-full mt-4">
+                        <Button className="w-full mt-4" onClick={generateBill}>
                             Generate Bill
                         </Button>
                     </div>
                 </div>
             )}
+
+            <Dialog open={billOpen} onOpenChange={setBillOpen}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Bill Summary</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                        <div className="border-b pb-4">
+                            <h3 className="font-semibold mb-2">Order Details</h3>
+                            {cart.map((c) => (
+                                <div key={c.item.id} className="flex justify-between text-sm mb-1">
+                                    <span>{c.item.name} x{c.quantity}</span>
+                                    <span>${(c.item.price * c.quantity).toFixed(2)}</span>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="flex justify-between font-bold text-lg">
+                            <span>Total Amount:</span>
+                            <span>${total.toFixed(2)}</span>
+                        </div>
+                        <div className="text-center text-sm text-gray-600">
+                            Thank you for your order!
+                        </div>
+                        <Button className="w-full" onClick={() => setBillOpen(false)}>
+                            Close
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

@@ -3,26 +3,27 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { menuId: string } }
+    { params }: { params: Promise<{ menuId: string }> }
 ) {
     try {
-        const menuId = params.menuId;
+        const { menuId } = await params;
         const items = await prisma.menuItem.findMany({
             where: { menuId },
             orderBy: { name: 'asc' },
         });
         return NextResponse.json(items);
     } catch (error) {
+        console.error('Error fetching menu items:', error);
         return NextResponse.json({ error: 'Failed to fetch menu items' }, { status: 500 });
     }
 }
 
 export async function POST(
     request: NextRequest,
-    { params }: { params: { menuId: string } }
+    { params }: { params: Promise<{ menuId: string }> }
 ) {
     try {
-        const menuId = params.menuId;
+        const { menuId } = await params;
         const body = await request.json();
         const { name, description, price, category, imageUrl } = body;
 
@@ -39,6 +40,7 @@ export async function POST(
 
         return NextResponse.json(item, { status: 201 });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to add item' }, { status: 500 });
+        console.error('Error creating menu item:', error);
+        return NextResponse.json({ error: 'Failed to create menu item' }, { status: 500 });
     }
 }
