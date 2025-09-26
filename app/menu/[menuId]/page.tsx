@@ -95,6 +95,7 @@ export default function MenuPage() {
         setModelDialogOpen(true);
     };
 
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
@@ -213,8 +214,8 @@ export default function MenuPage() {
                     <DialogHeader>
                         <DialogTitle>3D Model View</DialogTitle>
                     </DialogHeader>
-                    {!selectedModelUrl ? (
-                        <ModelViewer modelPath={selectedModelUrl || '/models/biryani.glb'} scale={10} />
+                    {selectedModelUrl ? (
+                        <ModelViewer modelPath={selectedModelUrl || '/models/biryani.glb'} scale={15} />
                     ) : (
                         <p className="text-center py-8">No 3D model available for this item.</p>
                     )}

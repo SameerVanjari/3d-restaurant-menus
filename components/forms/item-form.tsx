@@ -28,6 +28,7 @@ export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
     const [price, setPrice] = useState("");
     const [category, setCategory] = useState("");
     const [imageUrl, setImageUrl] = useState("");
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [modelFile, setModelFile] = useState<File | null>(null);
     const [modelUrl, setModelUrl] = useState("");
     const [loading, setLoading] = useState(false);
@@ -42,6 +43,37 @@ export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
             setModelUrl(item.modelUrl || "");
         }
     }, [item]);
+
+    const handleImageFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+            toast.error("Please select a .jpg, .jpeg, .png, or .gif file");
+            return;
+        }
+
+        setImageFile(file);
+        try {
+            const fileName = `${Date.now()}-${file.name}`;
+            const { data, error } = await supabase.storage
+                .from('images')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            const { data: publicUrl } = supabase.storage
+                .from('images')
+                .getPublicUrl(fileName);
+
+            setImageUrl(publicUrl.publicUrl);
+            toast.success("Image uploaded successfully");
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Failed to upload image");
+            setImageFile(null);
+        }
+    };
 
     const handleModelFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -103,6 +135,7 @@ export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
                     setPrice("");
                     setCategory("");
                     setImageUrl("");
+                    setImageFile(null);
                     setModelFile(null);
                     setModelUrl("");
                 }
@@ -171,6 +204,16 @@ export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
                 />
+            </div>
+            <div>
+                <Label htmlFor="imageFile">Image File (optional)</Label>
+                <Input
+                    id="imageFile"
+                    type="file"
+                    accept=".jpg,.jpeg,.png,.gif"
+                    onChange={handleImageFileChange}
+                />
+                {imageUrl && imageFile && <p className="text-sm text-green-600">Image uploaded: {imageFile.name}</p>}
             </div>
             <div>
                 <Label htmlFor="modelFile">3D Model File (optional)</Label>
