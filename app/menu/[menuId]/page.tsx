@@ -5,9 +5,10 @@ import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Minus, Plus, ShoppingCart } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import ModelViewer from '@/components/ModelViewer';
 
 type MenuItem = {
     id: string;
@@ -16,6 +17,7 @@ type MenuItem = {
     price: number;
     category: string;
     imageUrl: string;
+    modelUrl?: string;
 };
 
 type CartItem = {
@@ -30,6 +32,8 @@ export default function MenuPage() {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [billOpen, setBillOpen] = useState(false);
+    const [modelDialogOpen, setModelDialogOpen] = useState(false);
+    const [selectedModelUrl, setSelectedModelUrl] = useState<string>("");
 
     useEffect(() => {
         fetchMenuItems();
@@ -86,6 +90,11 @@ export default function MenuPage() {
         setBillOpen(true);
     };
 
+    const openModelDialog = (modelUrl: string) => {
+        setSelectedModelUrl(modelUrl);
+        setModelDialogOpen(true);
+    };
+
     if (loading) {
         return <div className="flex justify-center items-center h-screen">Loading...</div>;
     }
@@ -118,9 +127,14 @@ export default function MenuPage() {
                             <p className="text-sm text-gray-600 mb-4">{item.description}</p>
                             <div className="flex justify-between items-center">
                                 <span className="text-lg font-bold">${item.price.toFixed(2)}</span>
-                                <Button onClick={() => addToCart(item)}>
-                                    Add to Cart
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button variant="outline" size="icon" onClick={() => openModelDialog(item.modelUrl || "")} title="View 3D Model">
+                                        <Eye className="h-4 w-4" />
+                                    </Button>
+                                    <Button onClick={() => addToCart(item)}>
+                                        Add to Cart
+                                    </Button>
+                                </div>
                             </div>
                         </CardContent>
                     </Card>
@@ -191,6 +205,22 @@ export default function MenuPage() {
                             Close
                         </Button>
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={modelDialogOpen} onOpenChange={setModelDialogOpen}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>3D Model View</DialogTitle>
+                    </DialogHeader>
+                    {!selectedModelUrl ? (
+                        <ModelViewer modelPath={selectedModelUrl || '/models/biryani.glb'} scale={10} />
+                    ) : (
+                        <p className="text-center py-8">No 3D model available for this item.</p>
+                    )}
+                    <Button className="w-full mt-4" onClick={() => setModelDialogOpen(false)}>
+                        Close
+                    </Button>
                 </DialogContent>
             </Dialog>
         </div>

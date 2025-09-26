@@ -1,24 +1,78 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 interface ItemFormProps {
     menuId: string;
+    item?: {
+        id: string;
+        name: string;
+        description: string;
+        price: number;
+        category: string;
+        imageUrl?: string;
+        modelUrl?: string;
+    };
     onSuccess?: () => void;
 }
 
-export default function ItemForm({ menuId, onSuccess }: ItemFormProps) {
+export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [price, setPrice] = useState("");
     const [category, setCategory] = useState("");
     const [imageUrl, setImageUrl] = useState("");
+    const [modelFile, setModelFile] = useState<File | null>(null);
+    const [modelUrl, setModelUrl] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (item) {
+            setName(item.name);
+            setDescription(item.description || "");
+            setPrice(item.price.toString());
+            setCategory(item.category);
+            setImageUrl(item.imageUrl || "");
+            setModelUrl(item.modelUrl || "");
+        }
+    }, [item]);
+
+    const handleModelFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.glb') && !file.name.endsWith('.gltf')) {
+            toast.error("Please select a .glb or .gltf file");
+            return;
+        }
+
+        setModelFile(file);
+        try {
+            const fileName = `${Date.now()}-${file.name}`;
+            const { data, error } = await supabase.storage
+                .from('3d-models')
+                .upload(fileName, file);
+
+            if (error) throw error;
+
+            const { data: publicUrl } = supabase.storage
+                .from('3d-models')
+                .getPublicUrl(fileName);
+
+            setModelUrl(publicUrl.publicUrl);
+            toast.success("3D model uploaded successfully");
+        } catch (error) {
+            console.error("Upload error:", error);
+            toast.error("Failed to upload 3D model");
+            setModelFile(null);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,8 +80,10 @@ export default function ItemForm({ menuId, onSuccess }: ItemFormProps) {
 
         setLoading(true);
         try {
-            const response = await fetch(`/api/menus/${menuId}/items`, {
-                method: "POST",
+            const url = item ? `/api/menus/${menuId}/items/${item.id}` : `/api/menus/${menuId}/items`;
+            const method = item ? "PUT" : "POST";
+            const response = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name,
@@ -35,19 +91,24 @@ export default function ItemForm({ menuId, onSuccess }: ItemFormProps) {
                     price: parseFloat(price),
                     category,
                     imageUrl: imageUrl || undefined,
+                    modelUrl: modelUrl || undefined,
                 }),
             });
 
             if (response.ok) {
-                toast.success("Item added successfully!");
-                setName("");
-                setDescription("");
-                setPrice("");
-                setCategory("");
-                setImageUrl("");
+                toast.success(item ? "Item updated successfully!" : "Item added successfully!");
+                if (!item) {
+                    setName("");
+                    setDescription("");
+                    setPrice("");
+                    setCategory("");
+                    setImageUrl("");
+                    setModelFile(null);
+                    setModelUrl("");
+                }
                 onSuccess?.();
             } else {
-                toast.error("Failed to add item");
+                toast.error(item ? "Failed to update item" : "Failed to add item");
             }
         } catch (error) {
             toast.error("Error adding item");
@@ -110,6 +171,16 @@ export default function ItemForm({ menuId, onSuccess }: ItemFormProps) {
                     onChange={(e) => setImageUrl(e.target.value)}
                     placeholder="https://example.com/image.jpg"
                 />
+            </div>
+            <div>
+                <Label htmlFor="modelFile">3D Model File (optional)</Label>
+                <Input
+                    id="modelFile"
+                    type="file"
+                    accept=".glb,.gltf"
+                    onChange={handleModelFileChange}
+                />
+                {modelUrl && <p className="text-sm text-green-600">Model uploaded: {modelFile?.name}</p>}
             </div>
             <Button type="submit" disabled={loading}>
                 {loading ? "Adding..." : "Add Item"}

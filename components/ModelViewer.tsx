@@ -35,6 +35,7 @@ const ModelViewer = ({ modelPath, scale = 1 }: { modelPath: string; scale?: numb
             style={{ height: 400, width: '100%' }}
             gl={{ antialias: true, powerPreference: 'high-performance' }}
             dpr={[1, 1.5]}
+            className='cursor-grab active:cursor-grabbing'
         >
             {/* Room-style lighting */}
             <ambientLight intensity={0.4} />

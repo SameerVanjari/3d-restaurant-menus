@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, ArrowLeft } from 'lucide-react';
+import { Plus, ArrowLeft, Edit } from 'lucide-react';
 import { toast } from 'sonner';
 import ItemForm from '@/components/forms/item-form';
 
@@ -17,6 +17,7 @@ type MenuItem = {
     price: number;
     category: string;
     imageUrl: string;
+    modelUrl?: string;
 };
 
 export default function ManageMenuItems() {
@@ -25,6 +26,8 @@ export default function ManageMenuItems() {
     const menuId = params.menuId as string;
     const [items, setItems] = useState<MenuItem[]>([]);
     const [isAddItemOpen, setIsAddItemOpen] = useState(false);
+    const [editItem, setEditItem] = useState<MenuItem | null>(null);
+    const [isEditItemOpen, setIsEditItemOpen] = useState(false);
 
     useEffect(() => {
         fetchItems();
@@ -67,6 +70,20 @@ export default function ManageMenuItems() {
                         <ItemForm menuId={menuId} onSuccess={() => { setIsAddItemOpen(false); fetchItems(); }} />
                     </DialogContent>
                 </Dialog>
+                <Dialog open={isEditItemOpen} onOpenChange={setIsEditItemOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Edit Item</DialogTitle>
+                        </DialogHeader>
+                        {editItem && (
+                            <ItemForm
+                                menuId={menuId}
+                                item={editItem}
+                                onSuccess={() => { setIsEditItemOpen(false); setEditItem(null); fetchItems(); }}
+                            />
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -87,7 +104,8 @@ export default function ManageMenuItems() {
                             <p className="text-sm text-gray-600 mb-4">{item.description}</p>
                             <div className="flex justify-between items-center">
                                 <span className="text-lg font-bold">${item.price.toFixed(2)}</span>
-                                <Button variant="outline" size="sm">
+                                <Button variant="outline" size="sm" onClick={() => { setEditItem(item); setIsEditItemOpen(true); }}>
+                                    <Edit className="w-4 h-4 mr-2" />
                                     Edit
                                 </Button>
                             </div>

@@ -29,6 +29,7 @@ model MenuItem {
   menuId      String
   name        String
   imageUrl    String?
+  modelUrl    String?
   description String?
   category    String
   price       Float

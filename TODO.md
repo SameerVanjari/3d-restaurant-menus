@@ -1,0 +1,10 @@
+- [x] Install @supabase/supabase-js dependency
+- [x] Create lib/supabase.ts for Supabase client initialization
+- [x] Update prisma/schema.prisma to add modelUrl field to MenuItem
+- [x] Run Prisma migration and generate
+- [x] Update components/forms/item-form.tsx to add file input and upload logic
+- [x] Update app/api/menus/[menuId]/items/route.ts to handle modelUrl in POST
+- [x] Update app/menu/[menuId]/page.tsx to add 3D model button and dialog
+- [x] Check and update app/dashboard/menu/[menuId]/page.tsx if needed for display
+- [x] Test the functionality
+- [x] Add edit item functionality in dashboard

@@ -25,7 +25,7 @@ export async function POST(
     try {
         const { menuId } = await params;
         const body = await request.json();
-        const { name, description, price, category, imageUrl } = body;
+        const { name, description, price, category, imageUrl, modelUrl } = body;
 
         const item = await prisma.menuItem.create({
             data: {
@@ -35,6 +35,7 @@ export async function POST(
                 price: parseFloat(price),
                 category,
                 imageUrl,
+                modelUrl,
             },
         });
 
