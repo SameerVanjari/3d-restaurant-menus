@@ -25,6 +25,7 @@ export default function ManageMenuItems() {
     const router = useRouter();
     const menuId = params.menuId as string;
     const [items, setItems] = useState<MenuItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isAddItemOpen, setIsAddItemOpen] = useState(false);
     const [editItem, setEditItem] = useState<MenuItem | null>(null);
     const [isEditItemOpen, setIsEditItemOpen] = useState(false);
@@ -35,6 +36,7 @@ export default function ManageMenuItems() {
 
     const fetchItems = async () => {
         try {
+            setLoading(true);
             const response = await fetch(`/api/menus/${menuId}/items`);
             if (response.ok) {
                 const data = await response.json();
@@ -43,8 +45,14 @@ export default function ManageMenuItems() {
             }
         } catch (error) {
             toast.error('Failed to fetch items');
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    }
 
     return (
         <div className="container mx-auto p-6">

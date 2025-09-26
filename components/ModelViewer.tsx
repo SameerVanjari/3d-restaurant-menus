@@ -1,10 +1,22 @@
 import { Canvas } from '@react-three/fiber';
 import { Environment, OrbitControls, Center, useGLTF } from '@react-three/drei';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 
-const ModelViewer = ({ modelPath, scale = 1 }: { modelPath: string; scale?: number }) => {
+const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }) => {
     const { scene } = useGLTF(modelPath);
+    const [autoScale, setAutoScale] = useState(1);
+
+    useEffect(() => {
+        if (scene) {
+            const box = new THREE.Box3().setFromObject(scene);
+            const size = box.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            // Fit to canvas height 400px, with 80% fill
+            const fitScale = (8 * 0.8) / maxDim;
+            setAutoScale(fitScale);
+        }
+    }, [scene]);
 
     // // Clean up geometry & materials on unmount to avoid memory leaks
     // useEffect(() => {
@@ -54,7 +66,7 @@ const ModelViewer = ({ modelPath, scale = 1 }: { modelPath: string; scale?: numb
 
             {/* Center and scale automatically */}
             <Center>
-                <primitive object={scene} scale={scale || 10} />
+                <primitive object={scene} scale={scale || autoScale} />
             </Center>
 
             <OrbitControls

@@ -21,6 +21,7 @@ type Menu = {
 export default function Dashboard() {
     const router = useRouter();
     const [menus, setMenus] = useState<Menu[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isCreateMenuOpen, setIsCreateMenuOpen] = useState(false);
 
     // Fetch menus
@@ -30,6 +31,7 @@ export default function Dashboard() {
 
     const fetchMenus = async () => {
         try {
+            setLoading(true);
             const response = await fetch('/api/menus');
             if (response.ok) {
                 const data = await response.json();
@@ -37,8 +39,14 @@ export default function Dashboard() {
             }
         } catch (error) {
             toast.error('Failed to fetch menus');
+        } finally {
+            setLoading(false);
         }
     };
+
+    if (loading) {
+        return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    }
 
     return (
         <div className="container mx-auto p-6">

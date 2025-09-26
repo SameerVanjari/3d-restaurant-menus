@@ -215,7 +215,7 @@ export default function MenuPage() {
                         <DialogTitle>3D Model View</DialogTitle>
                     </DialogHeader>
                     {selectedModelUrl ? (
-                        <ModelViewer modelPath={selectedModelUrl || '/models/biryani.glb'} scale={15} />
+                        <ModelViewer modelPath={selectedModelUrl} />
                     ) : (
                         <p className="text-center py-8">No 3D model available for this item.</p>
                     )}

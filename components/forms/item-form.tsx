@@ -226,7 +226,7 @@ export default function ItemForm({ menuId, item, onSuccess }: ItemFormProps) {
                 {modelUrl && <p className="text-sm text-green-600">Model uploaded: {modelFile?.name}</p>}
             </div>
             <Button type="submit" disabled={loading}>
-                {loading ? "Adding..." : "Add Item"}
+                {loading ? (item ? "Updating..." : "Adding...") : (item ? "Edit Item" : "Add Item")}
             </Button>
         </form>
     );
