@@ -111,7 +111,7 @@ export default function ManageMenuItems() {
                             />
                             <p className="text-sm text-gray-600 mb-4">{item.description}</p>
                             <div className="flex justify-between items-center">
-                                <span className="text-lg font-bold">${item.price.toFixed(2)}</span>
+                                <span className="text-lg font-bold">₹ {item.price.toFixed(2)}</span>
                                 <Button variant="outline" size="sm" onClick={() => { setEditItem(item); setIsEditItemOpen(true); }}>
                                     <Edit className="w-4 h-4 mr-2" />
                                     Edit

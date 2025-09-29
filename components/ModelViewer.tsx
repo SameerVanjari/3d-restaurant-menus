@@ -1,11 +1,13 @@
 import { Canvas } from '@react-three/fiber';
 import { Environment, OrbitControls, Center, useGLTF } from '@react-three/drei';
+import { XR, ARButton, useXR, createXRStore } from '@react-three/xr';
 import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 
-const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }) => {
+const ModelViewer = ({ modelPath, scale, arMode, onExit }: { modelPath: string; scale?: number; arMode?: boolean; onExit?: () => void }) => {
     const { scene } = useGLTF(modelPath);
     const [autoScale, setAutoScale] = useState(1);
+    const store = createXRStore();
 
     useEffect(() => {
         if (scene) {
@@ -17,6 +19,17 @@ const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }
             setAutoScale(fitScale);
         }
     }, [scene]);
+
+    useEffect(() => {
+        if (arMode) {
+            const unsubscribe = store.subscribe((state) => {
+                if (!state.session) {
+                    onExit?.();
+                }
+            });
+            return unsubscribe;
+        }
+    }, [store, arMode, onExit]);
 
     // // Clean up geometry & materials on unmount to avoid memory leaks
     // useEffect(() => {
@@ -42,6 +55,38 @@ const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }
         };
     }, [modelPath]);
 
+    if (arMode) {
+        return (
+            <div className="fixed inset-0 z-50 bg-black">
+                <ARButton store={store} />
+                <Canvas
+                    style={{ height: '100vh', width: '100vw' }}
+                    gl={{ antialias: true, powerPreference: 'high-performance' }}
+                    dpr={[1, 1.5]}
+                >
+                    <XR store={store}>
+                        <ambientLight intensity={0.4} />
+                        <directionalLight
+                            position={[5, 10, 5]}
+                            intensity={1}
+                            castShadow
+                            shadow-mapSize-width={2048}
+                            shadow-mapSize-height={2048}
+                        />
+                        <pointLight position={[-5, 5, -5]} intensity={0.6} />
+                        <spotLight position={[0, 8, 10]} angle={0.3} intensity={0.8} />
+
+                        <Environment preset="apartment" />
+
+                        <Center>
+                            <primitive object={scene} scale={scale || autoScale} />
+                        </Center>
+                    </XR>
+                </Canvas>
+            </div>
+        );
+    }
+
     return (
         <Canvas
             style={{ height: 400, width: '100%' }}
@@ -49,7 +94,6 @@ const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }
             dpr={[1, 1.5]}
             className='cursor-grab active:cursor-grabbing'
         >
-            {/* Room-style lighting */}
             <ambientLight intensity={0.4} />
             <directionalLight
                 position={[5, 10, 5]}
@@ -61,10 +105,8 @@ const ModelViewer = ({ modelPath, scale }: { modelPath: string; scale?: number }
             <pointLight position={[-5, 5, -5]} intensity={0.6} />
             <spotLight position={[0, 8, 10]} angle={0.3} intensity={0.8} />
 
-            {/* Environment for reflections */}
             <Environment preset="apartment" />
 
-            {/* Center and scale automatically */}
             <Center>
                 <primitive object={scene} scale={scale || autoScale} />
             </Center>

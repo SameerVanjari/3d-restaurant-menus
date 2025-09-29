@@ -34,10 +34,19 @@ export default function MenuPage() {
     const [billOpen, setBillOpen] = useState(false);
     const [modelDialogOpen, setModelDialogOpen] = useState(false);
     const [selectedModelUrl, setSelectedModelUrl] = useState<string>("");
+    const [arSupported, setArSupported] = useState(false);
+    const [arMode, setArMode] = useState(false);
+    const [arModelUrl, setArModelUrl] = useState("");
 
     useEffect(() => {
         fetchMenuItems();
     }, [menuId]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && navigator.xr) {
+            navigator.xr.isSessionSupported('immersive-ar').then(setArSupported).catch(() => setArSupported(false));
+        }
+    }, []);
 
     const fetchMenuItems = async () => {
         try {
@@ -127,7 +136,7 @@ export default function MenuPage() {
                             />
                             <p className="text-sm text-gray-600 mb-4">{item.description}</p>
                             <div className="flex justify-between items-center">
-                                <span className="text-lg font-bold">${item.price.toFixed(2)}</span>
+                                <span className="text-lg font-bold">₹ {item.price.toFixed(2)}</span>
                                 <div className="flex gap-2">
                                     <Button variant="outline" size="icon" onClick={() => openModelDialog(item.modelUrl || "")} title="View 3D Model">
                                         <Eye className="h-4 w-4" />
@@ -165,13 +174,13 @@ export default function MenuPage() {
                                     >
                                         <Plus className="w-3 h-3" />
                                     </Button>
-                                    <span>${(c.item.price * c.quantity).toFixed(2)}</span>
+                                    <span>₹{(c.item.price * c.quantity).toFixed(2)}</span>
                                 </div>
                             </div>
                         ))}
                         <div className="flex justify-between items-center font-bold text-lg">
                             <span>Total:</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>₹{total.toFixed(2)}</span>
                         </div>
                         <Button className="w-full mt-4" onClick={generateBill}>
                             Generate Bill
@@ -191,13 +200,13 @@ export default function MenuPage() {
                             {cart.map((c) => (
                                 <div key={c.item.id} className="flex justify-between text-sm mb-1">
                                     <span>{c.item.name} x{c.quantity}</span>
-                                    <span>${(c.item.price * c.quantity).toFixed(2)}</span>
+                                    <span>₹{(c.item.price * c.quantity).toFixed(2)}</span>
                                 </div>
                             ))}
                         </div>
                         <div className="flex justify-between font-bold text-lg">
                             <span>Total Amount:</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>₹{total.toFixed(2)}</span>
                         </div>
                         <div className="text-center text-sm text-gray-600">
                             Thank you for your order!
@@ -219,11 +228,18 @@ export default function MenuPage() {
                     ) : (
                         <p className="text-center py-8">No 3D model available for this item.</p>
                     )}
+                    {arSupported && selectedModelUrl && (
+                        <Button className="w-full mt-4" onClick={() => { setModelDialogOpen(false); setArMode(true); setArModelUrl(selectedModelUrl); }}>
+                            View in AR
+                        </Button>
+                    )}
                     <Button className="w-full mt-4" onClick={() => setModelDialogOpen(false)}>
                         Close
                     </Button>
                 </DialogContent>
             </Dialog>
+
+            {arMode && <ModelViewer modelPath={arModelUrl} arMode onExit={() => setArMode(false)} />}
         </div>
     );
 }
